@@ -1,0 +1,49 @@
+import cv2
+
+camera = cv2.VideoCapture(0)
+
+if not camera.isOpened():
+    print("Cannot open camera")
+    camera.release()
+    exit()
+
+output = input("Please enter output name: ")
+fps = int(input("Enter the fps of video: "))
+
+success, image = camera.read()
+if not success:
+    print("Cannot read from camera")
+    camera.release()
+    exit()
+
+height, width = image.shape[:2]
+codec = cv2.VideoWriter_fourcc(*'mp4v')   # try 'XVID' if mp4 fails
+recorder = cv2.VideoWriter(output + '.mp4', codec, fps, (width, height))
+
+print("Press 'r' to start/stop recording, 'q' to quit.")
+
+recording = False  # flag to track recording state
+
+while True:
+    success, image = camera.read()
+    if not success:
+        print("Cannot read the image")
+        break
+
+    cv2.imshow("Live Recording", image)
+
+    key = cv2.waitKey(1) & 0xFF
+    if key == ord('r'):   # toggle recording
+        recording = not recording
+        print("Recording started" if recording else "Recording stopped")
+
+    if recording:
+        recorder.write(image)
+
+    if key == ord('q'):   # quit
+        print("Quitting")
+        break
+
+camera.release()
+recorder.release()
+cv2.destroyAllWindows()

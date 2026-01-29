@@ -1,0 +1,46 @@
+import cv2
+
+camera = cv2.VideoCapture(0)
+if not camera.isOpened():
+    print('Cannot open camera')
+    
+
+success, frame = camera.read()
+if not success:
+    print('Failed to read from camera')
+    camera.release()
+   
+
+height, width = frame.shape[:2]
+fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+recorder = cv2.VideoWriter('my_video.mp4', fourcc, 25.0, (width, height))
+if not recorder.isOpened():
+    print('VideoWriter failed to open — try a different codec or path')
+    camera.release()
+   
+
+
+recorder.write(frame)
+
+while True:
+    success, image = camera.read()
+    if not success:
+        print('problem with recording')
+        break
+
+    
+    if image.shape[1] != width or image.shape[0] != height:
+        print('Frame size changed — skipping frame')
+        continue
+
+    recorder.write(image)
+    cv2.imshow('live recording', image)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        print('quitting')
+        break
+
+camera.release()
+recorder.release()
+cv2.destroyAllWindows()
+
